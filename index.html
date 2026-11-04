@@ -15,16 +15,442 @@
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/png" href="/img/cw_logo.png" />
+    <link rel="icon" type="image/png" href="img/cw_logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <main class="game-wrapper">
+      <!-- Game Header -->
+      <header class="game-header">
+        <div class="brand-badge">
+          <img src="img/cw_logo.png" alt="charity: water logo" />
+          <span>charity: water</span>
+        </div>
+        <h1>Drop It in the Bucket</h1>
+        <p>Move the bucket to catch clean water for communities around the world.</p>
+
+        <div class="game-instructions">
+          <strong>
+            <span>💡 How to play</span>
+          </strong>
+          <span>
+            Move the bucket with your mouse, finger, or arrow keys—or <strong>tap drops directly</strong> in mid-air! Catch blue drops for <strong>+1</strong> or <strong>+3</strong> points, tap brown drops to <strong>purify</strong> them (+2 pts), collect floating <strong>Jerry Cans (+5 pts)</strong>, and try different difficulty modes!
+          </span>
+        </div>
+      </header>
+
+      <!-- Difficulty Selector -->
+      <div class="difficulty-container" role="region" aria-label="Game Difficulty Settings">
+        <div class="difficulty-header">
+          <span class="difficulty-label">Difficulty Mode:</span>
+          <span id="difficulty-hint" class="difficulty-hint">Select before starting</span>
+        </div>
+
+        <div class="difficulty-tabs">
+          <button
+            type="button"
+            id="tab-easy"
+            class="difficulty-tab easy"
+            data-difficulty="easy"
+            title="Easy: 60s timer, relaxed drop speed, 15 points to win"
+          >
+            <div class="difficulty-tab-top">
+              <span class="difficulty-name">Easy</span>
+              <span class="difficulty-badge">Relaxed</span>
+            </div>
+            <div class="difficulty-specs">
+              <span>⏱️ 60s</span>
+              <span>🎯 15 pts</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            id="tab-normal"
+            class="difficulty-tab normal active"
+            data-difficulty="normal"
+            title="Normal: 45s timer, standard speed, 20 points to win"
+          >
+            <div class="difficulty-tab-top">
+              <span class="difficulty-name">Normal</span>
+              <span class="difficulty-badge">Standard</span>
+            </div>
+            <div class="difficulty-specs">
+              <span>⏱️ 45s</span>
+              <span>🎯 20 pts</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            id="tab-hard"
+            class="difficulty-tab hard"
+            data-difficulty="hard"
+            title="Hard: 30s timer, fast drops, 30 points to win"
+          >
+            <div class="difficulty-tab-top">
+              <span class="difficulty-name">Hard</span>
+              <span class="difficulty-badge">Challenging</span>
+            </div>
+            <div class="difficulty-specs">
+              <span>⏱️ 30s</span>
+              <span>🎯 30 pts</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Score & Status Panel -->
+      <section class="score-panel" aria-label="Game status">
+        <div class="score-panel-stats">
+          <div class="stat-item">
+            <span class="stat-label">Points:</span>
+            <strong id="score" class="stat-value highlight">0</strong>
+          </div>
+          <div class="stat-item" title="Win Goal Points">
+            <span class="stat-label">Goal:</span>
+            <strong class="stat-value goal-value">
+              <svg class="inline-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+              </svg>
+              <span id="goal-score">20</span>
+            </strong>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Best:</span>
+            <strong id="high-score" class="stat-value">0</strong>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Timer:</span>
+            <strong id="timer" class="stat-value">0:45</strong>
+          </div>
+        </div>
+
+        <div class="score-panel-controls">
+          <button
+            type="button"
+            id="mute-btn"
+            class="icon-btn"
+            title="Toggle audio mute"
+            aria-label="Toggle audio mute"
+          >
+            <!-- Default unmute icon -->
+            <svg id="icon-sound-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg id="icon-sound-off" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+
+          <button type="button" id="start-btn" class="game-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span id="start-btn-text">Start Game</span>
+          </button>
+
+          <button type="button" id="reset-btn" class="game-btn reset-btn" title="Reset game to start">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            <span>Reset</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Game Stage -->
+      <section
+        id="game-container"
+        class="theme-india"
+        aria-label="Water catching game"
+      >
+        <div class="cloud cloud-left" aria-hidden="true"></div>
+        <div class="cloud cloud-right" aria-hidden="true"></div>
+
+        <div class="landscape" aria-hidden="true">
+          <div class="landscape-trees">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div id="feedback" class="feedback" aria-live="polite">
+          Move the bucket or tap drops to collect clean water.
+        </div>
+
+        <div id="confetti" aria-hidden="true"></div>
+
+        <!-- Milestone Banner -->
+        <div id="milestone-banner" class="milestone-banner hidden" role="alert" aria-live="assertive">
+          <div class="milestone-content">
+            <div class="milestone-icon-wrap">
+              <svg class="milestone-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="6"></circle>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+              </svg>
+              <svg class="milestone-sparkle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+              </svg>
+            </div>
+
+            <div class="milestone-text">
+              <div class="milestone-title-row">
+                <span id="milestone-score-tag" class="milestone-score-tag">5 PTS</span>
+                <strong id="milestone-title" class="milestone-title">First Splash! 💧</strong>
+              </div>
+              <p id="milestone-desc" class="milestone-desc">Great start! 5 points collected—every drop counts.</p>
+            </div>
+
+            <button type="button" id="milestone-close-btn" class="milestone-close" aria-label="Dismiss milestone alert">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Country Information Card -->
+        <div id="country-info" class="country-info">
+          <strong id="country-label">India</strong>
+          <span id="country-description">Clean water helps families stay healthy and children stay in school.</span>
+        </div>
+
+        <!-- Game Elements Containers -->
+        <div id="jerrycan-layer"></div>
+        <div id="drops-layer"></div>
+
+        <!-- Bucket -->
+        <div id="bucket" class="bucket" aria-label="Water bucket">
+          <div class="bucket-brand">
+            <img src="img/cw_logo.png" alt="" />
+            <span>charity: water</span>
+          </div>
+        </div>
+
+        <!-- Feedback Splashes & Score Popups -->
+        <div id="splashes-container" class="splashes-container" aria-hidden="true"></div>
+        <div id="popups-container" class="score-popups-container" aria-hidden="true"></div>
+
+        <!-- Game Over Modal -->
+        <div id="game-over-modal" class="game-over-modal hidden" role="dialog" aria-modal="true" aria-labelledby="game-over-title">
+          <div class="game-over-card">
+            <h2 id="game-over-title" class="game-over-title">🎉 Goal Achieved!</h2>
+
+            <div class="game-over-meta">
+              <span id="game-over-mode-tag" class="game-over-mode-tag">Normal Mode</span>
+              <span id="game-over-goal-tag" class="game-over-goal-tag">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="12" r="6" />
+                  <circle cx="12" cy="12" r="2" />
+                </svg>
+                <span id="game-over-goal-text">Goal: 20 pts</span>
+              </span>
+            </div>
+
+            <div class="game-over-score-badge">
+              Collected: <strong id="game-over-score">0 points</strong>
+            </div>
+
+            <div id="high-score-announcement" style="display: none; color: #0284c7; font-weight: 600; margin-bottom: 12px; align-items: center; justify-content: center; gap: 6px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffc907" stroke="#231f20" stroke-width="1.5">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+              </svg>
+              <span>New High Score!</span>
+            </div>
+
+            <p id="game-over-message" class="game-over-message">Incredible work!</p>
+
+            <div class="game-over-actions">
+              <button type="button" id="modal-play-again-btn" class="game-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                  <path d="M21 3v5h-5"></path>
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                  <path d="M3 21v-5h5"></path>
+                </svg>
+                Play Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- charity: water Impact Footer -->
+      <footer class="charity-footer" role="contentinfo" aria-label="charity: water links and info">
+        <div class="charity-footer-card">
+          <!-- Brand Lockup Header -->
+          <div class="charity-footer-top">
+            <div class="charity-footer-brand">
+              <img
+                src="img/cw_logo-horizontal.png"
+                alt="charity: water"
+                class="charity-footer-logo"
+              />
+            </div>
+            <div class="charity-model-pill">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="m9 12 2 2 4-4"></path>
+              </svg>
+              <span>The 100% Model: Every public cent funds clean water</span>
+            </div>
+          </div>
+
+          <!-- Mission Statement -->
+          <p class="charity-footer-mission">
+            <strong>charity: water</strong> is a non-profit organization bringing clean and safe
+            drinking water to people in developing countries. Private donors fund all operating costs,
+            so 100% of public donations go straight to clean water projects in the field.
+          </p>
+
+          <!-- Impact Highlights Grid -->
+          <div class="charity-impact-grid">
+            <div class="impact-box">
+              <svg class="impact-icon blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path>
+                <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path>
+              </svg>
+              <div>
+                <div class="impact-stat">703 Million</div>
+                <div class="impact-desc">People still lack access to clean water worldwide</div>
+              </div>
+            </div>
+            <div class="impact-box">
+              <svg class="impact-icon yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+              </svg>
+              <div>
+                <div class="impact-stat">$40 / person</div>
+                <div class="impact-desc">Can provide clean water to one person for years</div>
+              </div>
+            </div>
+            <div class="impact-box">
+              <svg class="impact-icon green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <div>
+                <div class="impact-stat">29+ Countries</div>
+                <div class="impact-desc">Supported with transparent GPS proof on every well</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons & Links -->
+          <div class="charity-actions-section">
+            <div class="charity-button-group">
+              <a
+                href="https://www.charitywater.org/donate"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="charity-btn donate-btn"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#231f20" stroke="#231f20" stroke-width="2">
+                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                </svg>
+                <span>Donate to charity: water</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+
+              <a
+                href="https://www.charitywater.org/the-spring"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="charity-btn spring-btn"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path>
+                  <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path>
+                </svg>
+                <span>Join The Spring (Monthly Giving)</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.7;">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
+
+            <div class="charity-quick-links">
+              <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer" class="quick-link">
+                <span>Official Website</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+              <span class="dot-divider">•</span>
+              <a href="https://www.charitywater.org/our-work" target="_blank" rel="noopener noreferrer" class="quick-link">
+                <span>Our Work & Mission</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+              <span class="dot-divider">•</span>
+              <a href="https://www.charitywater.org/our-work/where-we-work" target="_blank" rel="noopener noreferrer" class="quick-link">
+                <span>Where We Work</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+              <span class="dot-divider">•</span>
+              <a href="https://www.charitywater.org/global-water-crisis" target="_blank" rel="noopener noreferrer" class="quick-link">
+                <span>The Water Crisis</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="charity-footer-legal">
+            <span>
+              Drop It in the Bucket is an educational game celebrating the mission of charity: water.
+              Visit <a href="https://www.charitywater.org" target="_blank" rel="noopener noreferrer">charitywater.org</a> to learn more or support life-saving projects.
+            </span>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Optional canvas-confetti CDN with robust inline fallback in script.js -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+    <!-- Main Vanilla JavaScript Game Script -->
+    <script src="script.js"></script>
   </body>
 </html>
