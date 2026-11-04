@@ -1,0 +1,6 @@
+{
+  "name": "Drop It in the Bucket",
+  "description": "Catch clean water drops with your bucket to support communities in India, Ethiopia, Haiti, and Uganda.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
